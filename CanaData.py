@@ -63,7 +63,7 @@ class CanaData:
             print('503 Status Code - Typically means too large of menu to load in API call.')
             return 'break'
         elif req.status_code == 403:
-            input(f'We\'ve hit a Captcha! Please open an incognito browser window to the following page and finish the prompt: \n\n{url}\n\n Hit enter when finished!\n\n')
+            input(f'We\'ve hit a Captcha! Please open an incognito browser window to the following page and finish the prompt: \n\n{url}\n\n Hit enter when finished to continue!\n\n\n')
             return 'captcha-retry'
         else:
             # Print the error into the terminal
@@ -167,7 +167,7 @@ class CanaData:
                     url = f'https://weedmaps.com/api/web/v1/listings/{location["slug"]}/menu?type={location["type"]}'
 
                     # Print visual queue the location is being worked on
-                    print(f'\nWorking on menu ({str(location_count)}/{str(len(self.locations))}) --> {location["slug"]}')
+                    print(f'\nWorking on menu ({str(location_count+1)}/{str(len(self.locations))}) --> {location["slug"]}')
                     if self.testMode is True:
                         print(f'Using url: {url}\n(for troubleshooting in browser)')
 
