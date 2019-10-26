@@ -50,24 +50,24 @@ class CanaData:
     # This function recieves a URL (string) and makes an HTTP request to it
     # If successul, converts the response to JSON and returns the dataset
     def do_request(self, url):
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
+        headers = {'User-Agent': userAgent}
         # Make the request to the URL (no authentication)
-        req = requests.get(url)
+        req = requests.get(url, headers=headers)
         # If status was success
         if req.status_code == 200:
             # Convert dataset to JSON
             reqJson = req.json()
             # Return JSON dataset
             return reqJson
-        elif req.status_code == 422:
-            print(req.text)
-            exit()
+        elif req.status_code == 503:
+            print('503 Status Code - Typically means too large of menu to load in API call.')
             return 'break'
         else:
             # Print the error into the terminal
-            print(req.text)
-            exit()
+            print(f"Issue retrieving url: {url}\nStatus Code:{req.status_code}\n")
             # Return False to signal issues
-            return False
+            return 'skip'
 
     # This function takes no input but uses the self variables to make its requests
     # Looping through to get all Locations for a given City/State slug
@@ -167,18 +167,26 @@ class CanaData:
                         print(f'Using url: {url}\n(for troubleshooting in browser)')
 
                     # Get the menu data from the URL
-                    menuData = requests.get(url)
+                    menuData = self.do_request(url)
 
-                    if menuData.status_code == 503:
-                        print('First Byte error. Unsure of what this means but skipping for now! Please reach out in discord.')
+                    if menuData == 'break':
+                        print('Hit a "break" error due to Response Code 503. Skipping this location. If you think this is an issue to investigate, please reach out in the discord')
                         finished = True
                         break
+                    elif menuData == 'skip':
+                        print('Issue with retrieval:\n')
+                        print(menuData.text)
+                        skip_check = input('Issue with menu retrival, see issue and hit Enter to retry or enter "Skip" to continue\n\n- ').lower()
+                        if 'skip' in skip_check.lower():
+                            print('Ok, skipping that locations items!')
+                            finished = True
+                        continue
 
                     # If that was successful
-                    if menuData.status_code == 200:
+                    else:
                         print('Successfully retrieved!')
-                        # Convert the menu data to JSON to work with
-                        menuJsonData = menuData.json()
+                        # Change Varialbe name to represent JSON version of the data
+                        menuJsonData = menuData
 
                         # Add to our count of Listing Progress
                         location_count += 1
@@ -248,15 +256,6 @@ class CanaData:
                         # print(f'#{str(len(self.allMenuItems.keys()))} Total Menus Processed!!')
 
                         finished = True
-
-                    else:
-                        print('Issue with retrieval:\n')
-                        print(menuData.text)
-                        skip_check = input('Issue with menu retrival, see issue and hit Enter to retry or enter "Skip" to continue\n\n- ').lower()
-                        if 'skip' in skip_check.lower():
-                            print('Ok, skipping that locations items!')
-                            finished = True
-                        continue
 
                 except Exception as e:
                     print('Caught an error on the Try function:\n')
