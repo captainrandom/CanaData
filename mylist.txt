@@ -1,3 +1,11 @@
-Texas
-Colorado
-Oregon
+alberta
+british-columbia--2
+manitoba
+new-brunswick
+newfoundland-and-labrador
+nova-scotia
+ontario
+prince-edward-island
+quebec--2
+saskatchewan
+yukon-territory

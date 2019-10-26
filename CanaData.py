@@ -528,8 +528,11 @@ if __name__ == '__main__':
         cana.getSlugs('https://api-g.weedmaps.com/wm/v1/regions/canada/subregions')
         answer = input('\nWhat state slug would you like to search? Or try your local city in lowercase with - in place of spaces!\n\n-- ').lower()
 
-        # State list is set to a single item list of what the user input
-        searchSlugs = [answer]
+        if answer == 'mylist':
+            searchSlugs = mySlugList
+        else:
+            # State list is set to a single item list of what the user input
+            searchSlugs = [answer]
 
     # This Loop fires no matter what to process all search slugs provided either manually or through a .txt file!
     # Fun functions against them all!
