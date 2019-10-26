@@ -11,7 +11,7 @@ Retrieve state/cities listing results from Weedmaps! (Yes you can try all 50 sta
 ## Got an Example CURL request to show what endpoints are involved?
 YUP! This example is for the lovely state of Washington DC as they don't have too many Locations so it's a smaller dataset. Feel free to changeout `washington-dc` to a lowercase version of your state (replace spaces with a dash if there is one `-`)
 ```
-curl -g "https://api-g.weedmaps.com/discovery/v1/listings?filter[any_retailer_services][]=storefront&filter[any_retailer_services][]=delivery&filter[region_slug[deliveries]]=washington-dc&filter[region_slug[dispensaries]]=washington-dc&page_size=100&size=100"
+curl --header "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36" -g "https://api-g.weedmaps.com/discovery/v1/listings?filter[any_retailer_services][]=storefront&filter[any_retailer_services][]=delivery&filter[region_slug[deliveries]]=washington-dc&filter[region_slug[dispensaries]]=washington-dc&page_size=100&size=100"
 ```
 
 ## Why would I use this?
