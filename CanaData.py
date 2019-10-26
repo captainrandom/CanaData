@@ -5,6 +5,7 @@ from os import makedirs
 from sys import path
 from sys import argv
 import requests
+import time
 import json
 import csv
 
@@ -61,6 +62,9 @@ class CanaData:
         elif req.status_code == 503:
             print('503 Status Code - Typically means too large of menu to load in API call.')
             return 'break'
+        elif req.status_code == 403:
+            input(f'We\'ve hit a Captcha! Please open an incognito browser window to the following page and finish the prompt: \n\n{url}\n\n Hit enter when finished!\n\n')
+            return 'captcha-retry'
         else:
             # Print the error into the terminal
             print(f"Issue retrieving url: {url}\nStatus Code:{req.status_code}\n")
@@ -87,7 +91,7 @@ class CanaData:
             locations = self.do_request(url)
 
             # Check if the request was successul or not
-            if locations is not False:
+            if type(locations) is dict:
                 if locations == 'break':
                     break
                 # If we haven't set our max # of locations, do so
@@ -156,6 +160,9 @@ class CanaData:
 
             while finished is False:
                 try:
+                    # Sleep for 3 seconds to reduce API calls
+                    # time.sleep(3)
+
                     # Craft a URL variable which pulls all menu items for a location
                     url = f'https://weedmaps.com/api/web/v1/listings/{location["slug"]}/menu?type={location["type"]}'
 
@@ -173,11 +180,14 @@ class CanaData:
                         break
                     elif menuData == 'skip':
                         print('Issue with retrieval:\n')
-                        print(menuData.text)
+                        print(menuData)
                         skip_check = input('Issue with menu retrival, see issue and hit Enter to retry or enter "Skip" to continue\n\n- ').lower()
                         if 'skip' in skip_check.lower():
                             print('Ok, skipping that locations items!')
                             finished = True
+                        continue
+
+                    elif menuData == 'captcha-retry':
                         continue
 
                     # If that was successful
