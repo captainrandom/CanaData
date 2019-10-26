@@ -479,6 +479,12 @@ if __name__ == '__main__':
     # This is where we end pu putting our list of items. Replaced with a list of search slugs -> []
     searchSlugs = None
 
+    try:
+        # Grab list of known Cities from local file
+        mySlugList = [line.rstrip('\n').lower().replace(' ', '-') for line in open('mylist.txt')]  # Updated by Manually through magic
+    except Exception as e:
+        print('Looks like no mylist.txt file! No biggy, just cant use the mylist option!')
+
     # Argument list
     argList = list(argv)
 
@@ -503,8 +509,13 @@ if __name__ == '__main__':
     if '-go' in argList:
         # Search slug location in args is after the -go
         searchSlug = argList.index('-go') + 1
+        # Determine if its one of our preset 3 or a regular search
+        if argv[searchSlug].lower() == 'mylist':
+            searchSlugs = mySlugList
+        else:
+            searchSlugs = [argv[searchSlug].lower()]
         # Visual queue of start (in place of question for search slug)
-        print(f'\n\n   !!~~-- Welcome to CanaData  (>-_-)>  --~~!!\n\n\n\nStarting Quickrun on {searchSlug}\n\n\n')
+        print(f'\n\n   !!~~-- Welcome to CanaData  (>-_-)>  --~~!!\n\n\n\nStarting Quickrun on {argv[searchSlug]}\n\n\n')
 
     # If user is not doing Quickrun
     # Ask them for a slug then determine if its one of our preset 3 or a regular search
@@ -518,15 +529,16 @@ if __name__ == '__main__':
         answer = input('\nWhat state slug would you like to search? Or try your local city in lowercase with - in place of spaces!\n\n-- ').lower()
 
         # State list is set to a single item list of what the user input
-        searchSlug = answer
+        searchSlugs = [answer]
 
-        # This Loop fires no matter what to process all search slugs provided either manually or through a .txt file!
-        # Fun functions against them all!
-        if len(searchSlug) > 0:
+    # This Loop fires no matter what to process all search slugs provided either manually or through a .txt file!
+    # Fun functions against them all!
+    for slug in searchSlugs:
+        if len(slug) > 0:
             # Visual queue of starting a state
-            print(f'\n\nStarting on {searchSlug}')
+            print(f'\n\nStarting on {slug}')
             # Set our searchSlug to the State we are working on
-            cana.setCitySlug(searchSlug)
+            cana.setCitySlug(slug)
             # Get the locations for the given slug
             cana.getLocations()
             # Get the Menus for the locations found
@@ -535,7 +547,6 @@ if __name__ == '__main__':
             cana.dataToCSV()
             # Reset the self variables to avoid using old data from other states/slugs
             cana.resetDataSets()
-
 
     # Print out the list of Non-Cannabis friendly states
     cana.identifyNaughtyStates()
