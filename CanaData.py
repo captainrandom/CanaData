@@ -457,11 +457,19 @@ class CanaData:
     def getSlugs(self, url):
         stateURL = url
         stateSlugs = self.do_request(stateURL)
-        region = stateSlugs['data']['subregions'][0]['region_path'].split('/')[0]
+        regionInfo = stateSlugs['data']['subregions'][0]['region_path'].split('/')
+        country = regionInfo[0]
+        stateName = regionInfo[1]
         slugList = []
         for state in stateSlugs['data']['subregions']:
             slugList.append(state['slug'])
-        print(f'\nHere are the list of {region.capitalize()} State Slugs!\n{", ".join(slugList)}\n')
+
+        prettySlugList = ",\n".join(slugList)
+
+        if len(regionInfo) > 2:
+            print(f'\nHere are the list of {stateName.capitalize()} City Slugs!\n{prettySlugList}\n')
+        else:
+            print(f'\nHere are the list of {country.capitalize()} State Slugs!\n{", ".join(slugList)}\n')
 
     # Function to determine if we are searching for Dispensary data or Delivery Data (can be both)
     def identifyDataTypes(self):
@@ -486,6 +494,11 @@ if __name__ == '__main__':
     # Initiate the Library
     cana = CanaData()
 
+    # Give user the menu of what to do
+    welcomeMessage = '\n\n   !!~~-- Welcome to CanaData  (>-_-)>  --~~!!\n\n'
+    welcomeMessage += '\nPlease run with \'python CanaData.py -help\' for the help menu!\n'
+    print(welcomeMessage)
+
     # This is where we end pu putting our list of items. Replaced with a list of search slugs -> []
     searchSlugs = None
 
@@ -497,9 +510,6 @@ if __name__ == '__main__':
 
     # Argument list
     argList = list(argv)
-
-    if '-tshoot' in argList:
-        cana.TestMode()
 
     # Check if arguments were passed
     if len(argList) > 1:
@@ -515,29 +525,52 @@ if __name__ == '__main__':
             cana.getSlugs('https://api-g.weedmaps.com/wm/v1/regions/canada/subregions')
             exit()
 
-    # This specifically looks for the quick run argument and sets the State list
-    if '-go' in argList:
-        # Search slug location in args is after the -go
-        searchSlug = argList.index('-go') + 1
-        # Determine if its one of our preset 3 or a regular search
-        if argv[searchSlug].lower() == 'mylist':
+        if '-tshoot' in argList:
+            cana.TestMode()
+
+        # This specifically looks for the quick run argument and sets the State list
+        if '-go' in argList:
+            # Search slug location in args is after the -go
+            searchSlug = argList.index('-go') + 1
+            # Determine if its one of our preset 3 or a regular search
+            if argv[searchSlug].lower() == 'mylist':
+                searchSlugs = mySlugList
+            else:
+                searchSlugs = [argv[searchSlug].lower()]
+            # Visual queue of start (in place of question for search slug)
+            print(f'\n\nStarting Quickrun on {argv[searchSlug]}\n\n\n')
+
+        # This looks to see if the user wants to see a list of Canada Slugs!
+        elif 'mylist' in argList:
             searchSlugs = mySlugList
-        else:
-            searchSlugs = [argv[searchSlug].lower()]
-        # Visual queue of start (in place of question for search slug)
-        print(f'\n\n   !!~~-- Welcome to CanaData  (>-_-)>  --~~!!\n\n\n\nStarting Quickrun on {argv[searchSlug]}\n\n\n')
+
+        if '-help' in argList:
+            helpMessage = '''There are a few ways to run the CanaData tool.\n
+If you do not know your City or State\'s search key, I would suggest using method #1.
+If you know your search slug, I would advise on using #2.
+If you\'re looking to run a lot of searches at once, I would advise on using #3.
+
+#1 - Run the code using "python3 CanaData.py" \nThis will prompt the menu to help guide you to your search slug.\n
+#2 - Run the code using "python3 CanaData.py -go slug" \nThis will auto run the code with the search slug with 0 menus or prompts.\n
+#3 - Run the code using "python3 CanaData.py -go mylist" \nThis will auto run the code for each search slug on the mylist file.'''
+            print(helpMessage)
+            exit()
 
     # If user is not doing Quickrun
     # Ask them for a slug then determine if its one of our preset 3 or a regular search
     else:
-        # Ask the user for what City they'd like to run
-        print('\n\n   !!~~-- Welcome to CanaData  (>-_-)>  --~~!!\n')
         # Post US Slugs for User to use:
         cana.getSlugs('https://api-g.weedmaps.com/wm/v1/regions/united-states/subregions')
         # Post Canada Slugs for User to use:
         cana.getSlugs('https://api-g.weedmaps.com/wm/v1/regions/canada/subregions')
-        answer = input('\nWhat state slug would you like to search? Or try your local city in lowercase with - in place of spaces!\n\n-- ').lower()
+        answer = input('\nWhat state search slug would you like to see the results for?\n\nInstead if you\'d like to see the city search slugs for a state, enter the state name followed by -cities\n\nEx. "california -cities"\n\n\n\n-- ').lower()
 
+        if '-cities' in answer:
+            state = answer.split(' ')[0]
+            cana.getSlugs(f'https://api-g.weedmaps.com/wm/v1/regions/{state}/subregions')
+
+            print('Try to find your local city search slug in the list above! Otherwise go into the browser and search your city + check the URL bar and compare to the list\n\n')
+            exit()
         if answer == 'mylist':
             searchSlugs = mySlugList
         else:
